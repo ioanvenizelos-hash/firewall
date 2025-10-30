@@ -1,0 +1,16 @@
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Established connections are Allowed
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Allow lo and ssh
+-A INPUT -p tcp -m tcp --dport 49803 -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A OUTPUT -o lo -j ACCEPTi
+
+
+
+COMMIT

@@ -1,0 +1,9 @@
+*filter
+:INPUT DROP [1:175]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [2007:3385994]
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 49803 -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A OUTPUT -o lo -j ACCEPT
+COMMIT
