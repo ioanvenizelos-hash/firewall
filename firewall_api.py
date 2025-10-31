@@ -34,7 +34,6 @@ def db_connection():
     return con
 
 @app.get("/firewall_rules/")
-
 def get_firewall_rules():
     con = db_connection()
     cur = con.cursor(cursor_factory=RealDictCursor)
@@ -80,7 +79,6 @@ def get_firewall_rules_by_field(
     if chain is not None:
         query+= f" AND chain = '{chain}'"
 
-
     if source is not None:
         query+= f" AND id = '{source}'"
     
@@ -104,3 +102,26 @@ def get_firewall_rules_by_field(
     con.close
 
     return {"firewall":rows}
+
+
+@app.delete("/firewall_rules/delete/{id}")
+def delete_firewall_rule(id: int):
+    try:
+        con = db_connection()
+        cur = con.cursor(cursor_factory=RealDictCursor) 
+        cur.execute("DELETE from firewall_rules WHERE ID=%s RETURNING id;", (id,))
+        deleted = cur.fetchone()
+        con.commit()
+        cur.close()
+        con.close()
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Alert not found") 
+        return {"message": "Alert deleted successfully"}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=f"Error: {str(e)}")
+
+
+
+
+
