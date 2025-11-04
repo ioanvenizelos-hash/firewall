@@ -8,7 +8,6 @@ from typing import Optional
 app = FastAPI()
 
 class firewall_rules(BaseModel):
-    id: int
     enabled: bool = True
     action: str
     chain: str
@@ -103,7 +102,6 @@ def get_firewall_rules_by_field(
 
     return {"firewall":rows}
 
-
 @app.delete("/firewall_rules/delete/{id}")
 def delete_firewall_rule(id: int):
     try:
@@ -121,7 +119,62 @@ def delete_firewall_rule(id: int):
     except Exception as e:
         raise HTTPException(status_code=500,detail=f"Error: {str(e)}")
 
+@app.post("/firewall_rules/add")
+def add_firewall_rule(frule: firewall_rules):
+    con = db_connection()
+    cur = con.cursor(cursor_factory=RealDictCursor)
 
+    try:
+        cur.execute("""
+                    INSERT INTO firewall_rules
+                    (enabled,action,chain,source,source_port,dest,dest_port,protocol,description,order_index,user_defined,visible,group_id,extra)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    RETURNING id
+                    """,(
+                        frule.enabled, frule.action, frule.chain, frule.source, frule.source_port,
+                        frule.dest, frule.dest_port, frule.protocol, frule.description,
+                        frule.order_index, frule.user_defined, frule.visible, frule.group_id, frule.extra
+        ))
+        new_id = cur.fetchone()['id']
+        con.commit()
+        return {"message": "New alert created", "id": new_id}
+    
+    except Exception as e:
+        con.rollback()
+        raise HTTPException(status_code=500,detail=f"Error: {str(e)}")
+    
+    finally:
+        cur.close()
+        con.close()
 
+@app.patch("/firewall_rules/edit")
+def edit_firewall_rule(id: int, frule: dict):
 
+    try:
+        con = db_connection()
+        cur = con.cursor(cursor_factory=RealDictCursor)
+        keys=[]
+        values=[]
 
+        for key,value in frule.items():
+            keys.append(f"{key} = %s")
+            values.append(value)
+
+        if not keys:
+            return {"message": "No Change"}
+
+        values.append(id)
+        query =  f"UPDATE firewall_rules SET {', '.join(keys)} WHERE id = %s RETURNING id"
+
+        cur.execute(query,values)
+        updated = cur.fetchone()
+        con.commit()
+        cur.close()
+        con.close()
+
+        if not updated:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        return {"message": "Alert updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=f"Error: {str(e)}")
