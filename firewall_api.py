@@ -10,17 +10,17 @@ app = FastAPI()
 class firewall_rules(BaseModel):
     enabled: bool = True
     action: str
-    chain: str
-    source: str
-    source_port: str
-    dest: str
-    dest_port: str
-    protocol: str
+    chain: Optional[str] = "FORWARD"
+    source: Optional[str] = "0.0.0.0/0"
+    source_port: Optional[str] = None
+    dest: Optional[str] = "0.0.0.0"
+    dest_port: Optional[str] = None
+    protocol: Optional[str] = None
     description: Optional[str] = None
     order_index: int
     user_defined: bool = True
     visible: bool = True
-    group_id: Optional[int]
+    group_id: Optional[int] = None
     extra: Optional[str] = None
 
 def db_connection():
@@ -79,7 +79,7 @@ def get_firewall_rules_by_field(
         query+= f" AND chain = '{chain}'"
 
     if source is not None:
-        query+= f" AND id = '{source}'"
+        query+= f" AND source = '{source}'"
     
     if source_port is not None:
         query+= f" AND source_port = '{source_port}'"
@@ -99,6 +99,7 @@ def get_firewall_rules_by_field(
     rows = cur.fetchall()
     cur.close
     con.close
+
 
     return {"firewall":rows}
 
@@ -178,3 +179,4 @@ def edit_firewall_rule(id: int, frule: dict):
 
     except Exception as e:
         raise HTTPException(status_code=500,detail=f"Error: {str(e)}")
+    
