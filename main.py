@@ -8,11 +8,12 @@ from datetime import datetime, timezone
 import re
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from jinja2 import Environment, FileSystemLoader
 
 
 base_url="http://127.0.0.1:8000/firewall_rules/"
 
-def get_alerts(id = None,
+def get_rules(id = None,
     enabled = None,
     action = None,
     chain = None,
@@ -56,7 +57,7 @@ def get_alerts(id = None,
     out = response.json().get("firewall", [])
     return(out)
 
-def delete_alert(alert_id):
+def delete_rules(alert_id):
     url = f"{base_url}delete/{alert_id}"
     print(url)
     response = requests.delete(f"{url}", verify=False)
@@ -67,10 +68,40 @@ def delete_alert(alert_id):
     else:
         print(f"Failed to delete alert {alert_id}. Status: {response.status_code}, Detail: {response.text}")
 
+
+
+def create_template():
+    env = Environment(loader=FileSystemLoader('/home/pi/firewall/templates/'))
+    template = env.get_template("firewall_rules_list.j2")
     
+    for firewall_rules in get_rules():
+        if firewall_rules['enabled'] == True:
+            parts = []
+            parts.append("-A FORWARD")
+
+            if firewall_rules.get("source"):
+                parts.append(f"-s {firewall_rules['source']}")
+            if firewall_rules.get("dest"):
+                parts.append(f"-d {firewall_rules['dest']}")
+            if firewall_rules.get("protocol"):
+               parts.append(f"-p {firewall_rules['protocol']}")
+            if firewall_rules.get("dest_port"):
+                parts.append(f"--dport {firewall_rules['dest_port']}")
+            if firewall_rules.get("action"):
+                parts.append(f"-j {firewall_rules['action']}")
+
+        rule_string = " ".join(parts)
+        
+        print(rule_string)
+
+       
+
+
+#    output = template.render(rules=rules)
+#    print(output)
 
 def main():
-    delete_alert("8")
+    create_template()
     
 if __name__ == '__main__':
     main()

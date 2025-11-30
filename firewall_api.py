@@ -17,7 +17,7 @@ class firewall_rules(BaseModel):
     dest_port: Optional[str] = None
     protocol: Optional[str] = None
     description: Optional[str] = None
-    order_index: int
+    order_index: int = None
     user_defined: bool = True
     visible: bool = True
     group_id: Optional[int] = None
@@ -128,13 +128,12 @@ def add_firewall_rule(frule: firewall_rules):
     try:
         cur.execute("""
                     INSERT INTO firewall_rules
-                    (enabled,action,chain,source,source_port,dest,dest_port,protocol,description,order_index,user_defined,visible,group_id,extra)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    (enabled,action,chain,source,source_port,dest,dest_port,protocol,description,user_defined,visible,group_id,extra)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                     RETURNING id
                     """,(
                         frule.enabled, frule.action, frule.chain, frule.source, frule.source_port,
-                        frule.dest, frule.dest_port, frule.protocol, frule.description,
-                        frule.order_index, frule.user_defined, frule.visible, frule.group_id, frule.extra
+                        frule.dest, frule.dest_port, frule.protocol, frule.description,frule.user_defined, frule.visible, frule.group_id, frule.extra
         ))
         new_id = cur.fetchone()['id']
         con.commit()
