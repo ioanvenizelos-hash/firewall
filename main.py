@@ -72,33 +72,37 @@ def delete_rules(alert_id):
 
 def create_template():
     env = Environment(loader=FileSystemLoader('/home/pi/firewall/templates/'))
-    template = env.get_template("firewall_rules_list.j2")
-    
+    template = env.get_template("nf_firewall_rules_list.j2")
+    nf_rules = []
     for firewall_rules in get_rules():
         if firewall_rules['enabled'] == True:
             parts = []
-            parts.append("-A FORWARD")
 
+            if firewall_rules.get("description"):
+                parts.append(f"# {firewall_rules['description']}\n")
             if firewall_rules.get("source"):
-                parts.append(f"-s {firewall_rules['source']}")
+                parts.append(f"\t\tip saddr {firewall_rules['source']}")
             if firewall_rules.get("dest"):
-                parts.append(f"-d {firewall_rules['dest']}")
+                parts.append(f"ip daddr {firewall_rules['dest']}")
+            
             if firewall_rules.get("protocol"):
-               parts.append(f"-p {firewall_rules['protocol']}")
+                if f"{firewall_rules['protocol'].lower()}" == 'icmp':
+                    parts.append(f"ip protocol {firewall_rules['protocol'].lower()}")
+                else:
+                   parts.append(f"{firewall_rules['protocol'].lower()}")
+
             if firewall_rules.get("dest_port"):
-                parts.append(f"--dport {firewall_rules['dest_port']}")
+                parts.append(f"dport {firewall_rules['dest_port']}")
             if firewall_rules.get("action"):
-                parts.append(f"-j {firewall_rules['action']}")
+                parts.append(f"{firewall_rules['action']}".lower())
 
         rule_string = " ".join(parts)
-        
-        print(rule_string)
+              
+        nf_rules.append(rule_string)
 
-       
-
-
-#    output = template.render(rules=rules)
-#    print(output)
+    output = template.render(forward_rules=nf_rules)
+    with open("/home/pi/firewall/generated_from_j2/firewall_rules.txt","w") as f:
+        f.write(output)
 
 def main():
     create_template()

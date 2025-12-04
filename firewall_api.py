@@ -13,7 +13,7 @@ class firewall_rules(BaseModel):
     chain: Optional[str] = "FORWARD"
     source: Optional[str] = "0.0.0.0/0"
     source_port: Optional[str] = None
-    dest: Optional[str] = "0.0.0.0"
+    dest: Optional[str] = "0.0.0.0/0"
     dest_port: Optional[str] = None
     protocol: Optional[str] = None
     description: Optional[str] = None
@@ -25,10 +25,11 @@ class firewall_rules(BaseModel):
 
 def db_connection():
     con = psycopg2.connect(
-        host='127.0.0.1',
+        host='my_postgres',
         database='mydb',
         user='pi',
-        password='j741995'
+        password='j741995',
+        port=5432
     )
     return con
 
