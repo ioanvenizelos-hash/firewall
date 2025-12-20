@@ -1,0 +1,40 @@
+table inet filter {
+	chain input {
+		type filter hook input priority filter; policy accept;
+		
+		#Allow established sessions
+		ct state established,related accept
+
+		#Allow lo
+		iifname "lo" accept
+
+		#Allow 49803-SSH
+		tcp dport 49803 accept
+
+}
+
+	chain forward {
+		type filter hook forward priority filter; policy accept;
+			
+		# --- Generated via API ---
+	        
+       		# Drop ICMP from 192.168.20.100
+ 		ip saddr 192.168.20.100 ip daddr 213.133.127.247 ip protocol icmp drop
+        	
+       		# Drop 80 to 8.8.8.8
+ 		ip saddr 192.168.20.100 ip daddr 8.8.8.8 dport 80 drop
+        	
+        	# --- End generated rules ---		
+
+}
+
+	chain output {
+		type filter hook output priority filter; policy accept;
+	}
+}
+table ip nat {
+	chain postrouting {
+		type nat hook postrouting priority srcnat; policy accept;
+		oif "eth0" masquerade
+	}
+}

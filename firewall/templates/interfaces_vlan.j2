@@ -1,0 +1,20 @@
+# interfaces(5) file used by ifup(8) and ifdown(8)
+# Include files from /etc/network/interfaces.d:
+source /etc/network/interfaces.d/*
+
+auto eth1
+iface eth1 inet static
+    address 10.123.179.9
+    netmask 255.255.255.0
+
+# Generated Interfaces via API
+
+{% for iface in interfaces %}
+auto eth1.{{ iface.vlan_id }}
+iface eth1.{{ iface.vlan_id }} inet static
+    address {{ iface.ip_address }}
+    netmask {{ iface.interface_netmask }}
+    vlan-raw-device eth1
+{% endfor %}
+
+# End generated interfaces
