@@ -9,12 +9,18 @@ iface eth1 inet static
 
 # Generated Interfaces via API
 
-{% for iface in interfaces %}
-auto eth1.{{ iface.vlan_id }}
-iface eth1.{{ iface.vlan_id }} inet static
-    address {{ iface.ip_address }}
-    netmask {{ iface.interface_netmask }}
+
+auto eth1.20
+iface eth1.20 inet static
+    address 192.168.20.254
+    netmask 255.255.255.0
     vlan-raw-device eth1
-{% endfor %}
+
+auto eth1.10
+iface eth1.10 inet static
+    address 192.168.10.254
+    netmask 255.255.255.0
+    vlan-raw-device eth1
+
 
 # End generated interfaces
