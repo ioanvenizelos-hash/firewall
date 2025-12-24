@@ -1,0 +1,5 @@
+#!/bin/bash
+{% for dock_net in dock_nets %}
+docker network create -d macvlan --subnet={{ dock_net.network }}/24 --gateway={{ dock_net.ip_address }} -o parent=eth1.{{ dock_net.vlan_id }} vlan{{ dock_net.vlan_id }}_net
+docker network connect --ip {{ dock_net.gw }} vlan{{ dock_net.vlan_id }}_net nf_firewarll
+{% endfor %}

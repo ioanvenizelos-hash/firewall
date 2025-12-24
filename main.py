@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import subprocess
 import argparse
 import ast
@@ -11,7 +12,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from jinja2 import Environment, FileSystemLoader
 
 
-base_url="http://127.0.0.1:8000/firewall_rules/"
+base_url="http://169.254.100.11:8000/firewall_rules/"
+
+interfaces_url = "http://169.254.100.13:8001/interfaces/"
+
 
 def get_rules(id = None,
     enabled = None,
@@ -54,6 +58,7 @@ def get_rules(id = None,
             url += f"{key}={value}&"
 
     response = requests.get(url, verify=False)
+
     out = response.json().get("firewall", [])
     return(out)
 
@@ -68,10 +73,44 @@ def delete_rules(alert_id):
     else:
         print(f"Failed to delete alert {alert_id}. Status: {response.status_code}, Detail: {response.text}")
 
+def get_interfaces(id = None,
+    enabled = None,
+    vlan_id = None,
+    ip_address = None,
+    interface_netmask = None,
+    network = None,
+    network_start = None,
+    network_finish = None,
+    gw = None,
+    ) :
+
+    url = f"{interfaces_url}?"
+
+    params = {
+        "id": id,
+        "enabled": enabled,
+        "vlan_id": vlan_id,
+        "ip_address": ip_address,
+        "interface_netmask": interface_netmask,
+        "network": network,
+        "network_start": network_start,
+        "network_finish": network_finish,
+        "gw": gw
+    }
+
+    for key, value in params.items():
+        if value is not None:
+            url += f"{key}={value}&"
+
+    response = requests.get(url, verify=False)
+
+    out = response.json().get("interfaces", [])
+    return(out)
 
 
-def create_template():
-    env = Environment(loader=FileSystemLoader('/home/pi/firewall/templates/'))
+
+def create_fw_rules_template():
+    env = Environment(loader=FileSystemLoader('/firewall/templates/'))
     template = env.get_template("nf_firewall_rules_list.j2")
     nf_rules = []
     for firewall_rules in get_rules():
@@ -101,12 +140,57 @@ def create_template():
         nf_rules.append(rule_string)
 
     output = template.render(forward_rules=nf_rules)
-    with open("/home/pi/firewall/generated_from_j2/firewall_rules.txt","w") as f:
+    with open("/firewall/generated_from_j2/firewall_rules.txt","w") as f:
+        f.write(output)
+
+
+def create_interfaces_template():
+    env = Environment(loader=FileSystemLoader('/firewall/templates/'))
+    template = env.get_template("interfaces_vlan.j2")
+
+    ifaces = []
+
+    for inter in get_interfaces():
+        if inter['enabled'] == True:
+            ifaces.append(inter)
+        
+    output = template.render(interfaces=ifaces)
+
+    with open("/firewall/generated_from_j2/interfaces_vlan.txt","w") as f:
+        f.write(output)
+
+def create_dhcp_conf():
+    env = Environment(loader=FileSystemLoader('/firewall/templates/'))
+    template = env.get_template("dhcpd.conf.j2")
+    dhcp_s =[]
+
+    for dhcp in get_interfaces():
+        if dhcp['enabled'] == True:
+            dhcp_s.append(dhcp)
+
+    output = template.render(networks=dhcp_s)
+    with open("/firewall/generated_from_j2/dhcpd.conf","w") as f:
+        f.write(output)
+
+def create_docker_networks():
+    env = Environment(loader=FileSystemLoader('/firewall/templates/'))
+    template = env.get_template("docker_networks.sh.j2")
+    dock_ns =[]
+
+    for dock in get_interfaces():
+        if dock['enabled'] == True:
+            dock_ns.append(dock)
+
+    output = template.render(dock_nets=dock_ns)
+    with open("/firewall/generated_from_j2/docker_networks.sh","w") as f:
         f.write(output)
 
 def main():
-    create_template()
-    
+    create_interfaces_template()
+    create_dhcp_conf()
+    create_fw_rules_template()
+    create_docker_networks()
+
 if __name__ == '__main__':
     main()
              

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 6ftnQunvmXfDT2RazfPt5Yfi3a2rmGFXrez1jXctKCoLSK25VVII6jbQsu3Bp1r
+\restrict MJabDtNA51Gl8Dc0EwNtICFccjuyTybpHEMWbD2PuvqJgXVoNe4sMzh3p870bxg
 
 -- Dumped from database version 15.14 (Debian 15.14-0+deb12u1)
 -- Dumped by pg_dump version 15.14 (Debian 15.14-0+deb12u1)
@@ -104,9 +104,8 @@ ALTER TABLE ONLY public.firewall_rules ALTER COLUMN id SET DEFAULT nextval('publ
 --
 
 COPY public.firewall_rules (id, enabled, action, chain, source, source_port, dest, dest_port, protocol, description, order_index, user_defined, visible, group_id, extra) FROM stdin;
-16	t	DROP	INPUT	192.168.20.100	\N	\N	\N	icmp	Drop ICMP from 192.168.20.100	5	t	t	1	\N
-14	t	ACCEPT	FORWARD	0.0.0.0/0	\N	\N	\N	\N	Allow	3	t	t	\N	\N
-15	t	DROP	FORWARD	0.0.0.0/0	\N	\N	\N	ICMP	DROP PINGs	4	t	t	\N	\N
+16	t	DROP	FORWARD	192.168.20.100	\N	213.133.127.247	\N	icmp	Drop ICMP from 192.168.20.100	5	t	t	1	\N
+14	t	DROP	FORWARD	192.168.20.100	\N	8.8.8.8	80	\N	Drop 80 to 8.8.8.8	3	t	t	\N	\N
 \.
 
 
@@ -143,5 +142,5 @@ GRANT ALL ON SCHEMA public TO pi;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 6ftnQunvmXfDT2RazfPt5Yfi3a2rmGFXrez1jXctKCoLSK25VVII6jbQsu3Bp1r
+\unrestrict MJabDtNA51Gl8Dc0EwNtICFccjuyTybpHEMWbD2PuvqJgXVoNe4sMzh3p870bxg
 
