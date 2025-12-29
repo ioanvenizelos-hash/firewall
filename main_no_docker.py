@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 #!/usr/bin/env python3
-=======
->>>>>>> personal/main
 import subprocess
 import argparse
 import ast

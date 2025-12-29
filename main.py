@@ -84,11 +84,7 @@ def get_interfaces(id = None,
     gw = None,
     ) :
 
-<<<<<<< HEAD
     url = f"{interfaces_url}?"
-=======
-    url = f"{interfaces_url}rules?"
->>>>>>> personal/main
 
     params = {
         "id": id,
@@ -99,13 +95,7 @@ def get_interfaces(id = None,
         "network": network,
         "network_start": network_start,
         "network_finish": network_finish,
-<<<<<<< HEAD
         "gw": gw
-=======
-        "gw": gw,
-        "created_at": created_at,
-        "updated_at": updated_at
->>>>>>> personal/main
     }
 
     for key, value in params.items():
@@ -151,7 +141,6 @@ def create_fw_rules_template():
 
     output = template.render(forward_rules=nf_rules)
     with open("/firewall/generated_from_j2/firewall_rules.txt","w") as f:
-<<<<<<< HEAD
         f.write(output)
 
 
@@ -194,68 +183,13 @@ def create_docker_networks():
 
     output = template.render(dock_nets=dock_ns)
     with open("/firewall/generated_from_j2/docker_networks.sh","w") as f:
-=======
->>>>>>> personal/main
         f.write(output)
-
-def create_interfaces_template():
-    env = Environment(loader=FileSystemLoader('/firewall/templates/'))
-    template = env.get_template("interfaces_vlan.j2")
-
-    ifaces = []
-
-    for inter in get_interfaces():
-        print(inter)
-'''''
-    data = {
-    "interfaces": [
-        {
-            "vlan_id": 20,
-            "ip_address": "192.168.20.1",
-            "net_mask": "255.255.255.0"
-        }
-    ]
-                }
-'''''
-
-
-#    output = template.render(**data)
-
-#    with open("/firewall/generated_from_j2/interfaces_vlan.txt","w") as f:
-#        f.write(output)
-
-
-def create_dhcp_conf():
-    env = Environment(loader=FileSystemLoader('/firewall/templates/'))
-    template = env.get_template("dhcpd.conf.j2")
-
-    data ={
-        "networks":[
-            {
-                "network" : "192.168.20.0",
-                "netmask" : "255.255.255.0",
-                "network_start" : "192.168.20.100",
-                "network_finish": "192.168.20.200",
-                "gw" : "192.168.20.254"
-            }
-
-        ]
-    }
-
-
-    output = template.render(**data)
-    with open("/firewall/generated_from_j2/dhcpd.conf","w") as f:
-        f.write(output)
-
 
 def main():
     create_interfaces_template()
     create_dhcp_conf()
     create_fw_rules_template()
-<<<<<<< HEAD
     create_docker_networks()
-=======
->>>>>>> personal/main
 
 if __name__ == '__main__':
     main()

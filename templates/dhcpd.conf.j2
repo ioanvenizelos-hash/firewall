@@ -115,11 +115,7 @@ authoritative;
 {%for network in networks %}
 subnet {{ network.network }} netmask {{ network.interface_netmask }} {
   range {{ network.network_start }} {{ network.network_finish }};
-<<<<<<< HEAD
   option routers {{ network.ip_address }};
-=======
-  option routers {{ network.gw }};
->>>>>>> personal/main
   option domain-name-servers 8.8.8.8, 1.1.1.1;
 }
 {% endfor %}
