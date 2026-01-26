@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: my_postgres
+    env_file:
+      - db/postgres.env
+    networks:
+      internal_net:
+        ipv4_address: 169.254.100.11
+    restart: unless-stopped
+
+  firewall-api:
+    build:
+      context: .
+      dockerfile: dockerfiles/firewall_api.Dockerfile
+    image: firewall-api
+    container_name: firewall-api
+    env_file:
+      - db/postgres.env
+    networks:
+      internal_net:
+        ipv4_address: 169.254.100.12
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  interfaces-api:
+    build:
+      context: .
+      dockerfile: dockerfiles/interfaces_api.Dockerfile
+    image: interfaces-api
+    container_name: interfaces-api
+    env_file:
+      - db/postgres.env
+    networks:
+      internal_net:
+        ipv4_address: 169.254.100.13
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  nf_firewall:
+    build:
+      context: .
+      dockerfile: dockerfiles/nf_firewall.Dockerfile
+    image: nf_firewall
+    container_name: nf_firewall
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    network_mode: host
+
+
+networks:
+  internal_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 169.254.100.0/24

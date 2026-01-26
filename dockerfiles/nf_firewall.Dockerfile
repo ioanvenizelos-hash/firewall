@@ -30,10 +30,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY generated_from_j2 ./generated_from_j2
 COPY templates ./templates
-COPY main.py .
-COPY firewall_api.py .
-COPY interfaces_api.py .
-COPY entrypoint.sh /firewall/entrypoint.sh
+COPY src/main.py .
+COPY src/firewall_api.py .
+COPY src/interfaces_api.py .
+COPY src/entrypoint.sh /firewall/entrypoint.sh
 RUN chmod +x /firewall/entrypoint.sh
 
 
