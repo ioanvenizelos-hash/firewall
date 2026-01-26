@@ -21,7 +21,7 @@ Containerized firewall hosted on a Debian 12 server (Raspberry Pi) with two phys
 
 **interfaces-api**  
 - FastAPI service exposing `/interfaces` REST API to manage VLAN/interface definitions.  
-- Data is stored in the same Postgres database and used to build VLAN, DHCP and Docker network configs.
+- Data is stored in the same Postgres database and used to build VLAN, DHCP.
 
 ## Project structure
 
